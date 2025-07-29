@@ -1,8 +1,10 @@
-exclude:
-  - wasm-projects/
-  - biome.js
+title: "JEDN Portfolio"
 
 plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+
+exclude:
+  - wasm-projects/
+  - biome.js
