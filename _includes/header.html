@@ -1,5 +1,7 @@
 <header class="header header--grid">
 	<div class="header__logo">
-		<a href="/">Jed Nelson</a>
+		{% assign subgenre_title = page.subgenre_title | default: layout.subgenre_title | default: "JEDN | Portfolio" %}
+		{% assign subgenre_title_link = page.subgenre_title_link | default: layout.subgenre_title_link | default: "/" %}
+		<a href="{{ subgenre_title_link }}">{{ subgenre_title }}</a>
 	</div>
 </header>

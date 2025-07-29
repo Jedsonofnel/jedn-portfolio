@@ -1,13 +1,20 @@
 /* no css goes in this file - it just imports the rest */
-@import url("base/reset.css");
-@import url("base/colors.css");
-@import url("base/spacing.css");
-@import url("base/typography.css");
+@import url("/assets/css/base/reset.css");
+@import url("/assets/css/base/colors.css");
+@import url("/assets/css/base/spacing.css");
+@import url("/assets/css/base/typography.css");
+@import url("/assets/css/base/backgrounds.css");
 
-@import url("layout.css");
+@import url("/assets/css/layout.css");
 
-@import url("pages/home.css");
-@import url("pages/cv.css");
+@import url("/assets/css/pages/home.css");
+@import url("/assets/css/pages/cv.css");
+@import url("/assets/css/pages/posts.css");
 
-@import url("components/footer.css");
-@import url("components/buttons.css");
+@import url("/assets/css/components/header.css");
+@import url("/assets/css/components/footer.css");
+@import url("/assets/css/components/hero.css");
+
+@import url("/assets/css/components/buttons.css");
+@import url("/assets/css/components/wasm-canvas.css");
+

@@ -1,0 +1,10 @@
+/* basic grid */
+
+.grid-background {
+	--grid-color: hsl(0, 0%, 40%);
+	background-image:
+		linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+	background-position: center;
+	background-size: 30px 50px;
+}

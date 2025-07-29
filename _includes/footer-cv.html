@@ -5,18 +5,17 @@
 		</div>
 
 		<div>
-			<a href="javascript:window.print()" class="btn">Download as PDF</a>
+			<a href="javascript:window.print()" class="btn--outline">Download as PDF</a>
 		</div>
 	</div>
 
 	<nav class="footer__right">
-		<ul class="footer_nav-ul">
-			<li>
-				<a href="/">Home</a>
-			</li>
-			<li>
-				<a href="/cv">Formal CV</a>
-			</li>
+		<ul class="footer__nav-ul">
+			{% for item in site.data.footer_navigation %}
+				<li>
+					<a href="{{item.link}}">{{item.name}}</a>
+				</li>
+			{% endfor %}
 		</ul>
 	</nav>
 </footer>

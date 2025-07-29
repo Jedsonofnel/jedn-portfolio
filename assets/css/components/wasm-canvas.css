@@ -1,0 +1,4 @@
+.wasm-canvas {
+	width: 100%;
+	margin: var(--space-4) 0;
+}

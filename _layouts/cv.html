@@ -2,7 +2,8 @@
 <html>
 	{% include page-head.html %}
 	<body class="body--grid">
-		<main class="main--grid main--homepage">
+		{% include header.html %}
+		<main class="main--grid">
 			{{ content }}
 		</main>
 		{% include footer-cv.html %}

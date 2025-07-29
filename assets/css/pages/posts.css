@@ -1,0 +1,11 @@
+.post__top-matter {
+	margin-bottom: var(--space-5);
+}
+
+.post-list {
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+}

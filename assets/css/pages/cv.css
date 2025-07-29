@@ -28,18 +28,6 @@
 	}
 }
 
-.cv__email-link {
-	color: var(--color-hi);
-
-	&:hover {
-		color: var(--color-hi-dark);
-	}
-
-	&:active {
-		color: var(--color-hi-darker);
-	}
-}
-
 .cv__section {
 	margin-bottom: var(--space-5);
 }
@@ -52,9 +40,9 @@
 	list-style: none;
 	padding-left: var(--space-5);
 	margin-left: var(--space-1);
-	border-left: 2px solid var(--color-hi);
+	border-left: 2px solid var(--color-fg);
 }
 
 .cv-download > a {
-	color: var(--color-hi);
+	color: var(--color-fg);
 }

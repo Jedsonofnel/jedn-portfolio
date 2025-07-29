@@ -19,11 +19,16 @@
 }
 
 footer::after {
-	content: "JED MADE ALL THIS";
+	content: "I MADE ALL THIS FROM SCRATCH >> 2025 JED NELSON >> ALL RIGHTS RESERVED";
 	font-family: var(--font-family);
 	position: absolute;
 	top: 100%;
 	right: 0;
+	padding: var(--space-1) var(--space-4);
+
+	@media only screen and (min-width: 800px) {
+		padding: var(--space-1) 0;
+	}
 }
 
 .footer__right,
@@ -47,4 +52,9 @@ footer::after {
 	@media only print {
 		display: none;
 	}
+}
+
+.footer__nav-ul {
+	list-style-type: none;
+	padding: 0;
 }

@@ -26,12 +26,12 @@
 		[main-end footer-start] auto [footer-end];
 }
 
-.main--grid,
-.header--grid {
+.main--grid {
 	grid-column: content-start / content-end;
 }
 
-.footer--grid {
+.footer--grid,
+.header--grid {
 	grid-column: full-start / full-end;
 	@media only screen and (min-width: 800px) {
 		grid-column: pad-start / pad-end;
@@ -48,16 +48,4 @@
 
 .footer--grid {
 	grid-row: footer-start / footer-end;
-}
-
-/* header related */
-.header {
-	width: 100%;
-	display: flex;
-	padding: var(--space-4) 0;
-}
-
-.header__logo > a {
-	font-weight: 500;
-	text-decoration: none;
 }

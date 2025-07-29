@@ -1,18 +1,18 @@
 <footer class="footer footer--grid footer--cv">
 	<div class="footer__left">
 		<div class="footer__logo">
-			<a href="/">{{ page.title }}</a>
+			{% assign subgenre_title = page.subgenre_title | default: layout.subgenre_title | default: "JEDN | Portfolio" %}
+			<a href="/">{{ subgenre_title }}</a>
 		</div>
 	</div>
 
 	<nav class="footer__right">
-		<ul class="footer_nav-ul">
-			<li>
-				<a href="/">Home</a>
-			</li>
-			<li>
-				<a href="/cv">Formal CV</a>
-			</li>
+		<ul class="footer__nav-ul">
+			{% for item in site.data.footer_navigation %}
+				<li>
+					<a href="{{item.link}}">{{item.name}}</a>
+				</li>
+			{% endfor %}
 		</ul>
 	</nav>
 </footer>
