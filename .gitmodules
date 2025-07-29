@@ -1,0 +1,3 @@
+[submodule "wasm-projects/cfd-but-wasm"]
+	path = wasm-projects/cfd-but-wasm
+	url = git@github.com:Jedsonofnel/cfd-but-wasm.git
