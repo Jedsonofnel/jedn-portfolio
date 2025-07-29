@@ -1,0 +1,60 @@
+/* Formal CV page styling */
+
+.cv__top-matter {
+	padding: var(--space-4) 0;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	@media only print {
+		padding-top: 0;
+	}
+}
+
+.cv__contact-screen {
+	display: flex;
+	flex-direction: column;
+
+	@media only print {
+		display: none;
+	}
+}
+
+.cv__contact-print {
+	display: none;
+	
+	@media only print {
+		display: block;
+	}
+}
+
+.cv__email-link {
+	color: var(--color-hi);
+
+	&:hover {
+		color: var(--color-hi-dark);
+	}
+
+	&:active {
+		color: var(--color-hi-darker);
+	}
+}
+
+.cv__section {
+	margin-bottom: var(--space-5);
+}
+
+.cv__subtitle {
+	margin-bottom: var(--space-2);
+}
+
+.cv__list {
+	list-style: none;
+	padding-left: var(--space-5);
+	margin-left: var(--space-1);
+	border-left: 2px solid var(--color-hi);
+}
+
+.cv-download > a {
+	color: var(--color-hi);
+}

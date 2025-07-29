@@ -1,0 +1,63 @@
+/* breakpoints are:
+* medium: (min-width: 800px)
+* large: (min-width: 1000px)
+* huge: (min-width: 1200px)
+*/
+
+.body--grid {
+	background-color: var(--color-bg);
+	display: grid;
+	grid-template-columns:
+		[full-start] 1fr
+		[pad-start] var(--space-5)
+		[content-start] minmax(0, var(--max-content-width)) [content-end]
+		var(--space-5) [pad-end]
+		1fr [full-end];
+	grid-template-rows:
+		[header-start] auto [header-end main-start]
+		minmax(calc(100vh - var(--header-height) - var(--footer-margin)), 1fr)
+		[main-end footer-start] auto [footer-end];
+}
+
+.body--grid-homepage {
+	grid-template-rows:
+		[header-start] auto [header-end main-start]
+		minmax(calc(100vh - var(--footer-margin)), 1fr) 
+		[main-end footer-start] auto [footer-end];
+}
+
+.main--grid,
+.header--grid {
+	grid-column: content-start / content-end;
+}
+
+.footer--grid {
+	grid-column: full-start / full-end;
+	@media only screen and (min-width: 800px) {
+		grid-column: pad-start / pad-end;
+	}
+}
+
+.header-grid {
+	grid-row: header-start / header-end;
+}
+
+.main--grid {
+	grid-row: main-start / main-end;
+}
+
+.footer--grid {
+	grid-row: footer-start / footer-end;
+}
+
+/* header related */
+.header {
+	width: 100%;
+	display: flex;
+	padding: var(--space-4) 0;
+}
+
+.header__logo > a {
+	font-weight: 500;
+	text-decoration: none;
+}

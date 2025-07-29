@@ -1,0 +1,13 @@
+/* no css goes in this file - it just imports the rest */
+@import url("base/reset.css");
+@import url("base/colors.css");
+@import url("base/spacing.css");
+@import url("base/typography.css");
+
+@import url("layout.css");
+
+@import url("pages/home.css");
+@import url("pages/cv.css");
+
+@import url("components/footer.css");
+@import url("components/buttons.css");

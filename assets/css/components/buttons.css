@@ -1,0 +1,31 @@
+.btn,
+.btn--outline {
+	display: inline-flex;
+	border: 2px solid var(--color-hi);
+	background-color: var(--color-hi);
+	border-radius: var(--border-radius);
+	padding: var(--space-2) var(--space-3);
+	line-height: 1;
+	text-decoration: none;
+	color: var(--color-bg);
+
+	&:hover {
+		border-color: var(--color-hi-dark);
+		background-color: var(--color-hi-dark);
+	}
+
+	&:active {
+		border-color: var(--color-hi-darker);
+		background-color: var(--color-hi-darker);
+	}
+}
+
+.btn--outline {
+	background-color: var(--color-bg);
+	color: var(--color-hi);
+
+	&:hover,
+	&:active {
+		background-color: var(--bg);
+	}
+}

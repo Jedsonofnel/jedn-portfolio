@@ -1,0 +1,50 @@
+.footer {
+	min-height: 200px;
+	border-top: 2px solid var(--color-fg);
+	border-top-left-radius: var(--border-radius);
+	border-top-right-radius: var(--border-radius);
+	margin-top: var(--footer-margin);
+	position: relative;
+
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+	@media only screen and (min-width: 800px) {
+		border-left: 2px solid var(--color-fg);
+		border-right: 2px solid var(--color-fg);
+		border-bottom: 2px solid var(--color-fg);
+		border-radius: var(--border-radius);
+		margin-bottom: var(--space-6);
+	}
+}
+
+footer::after {
+	content: "JED MADE ALL THIS";
+	font-family: var(--font-family);
+	position: absolute;
+	top: 100%;
+	right: 0;
+}
+
+.footer__right,
+.footer__left {
+	padding: var(--space-4);
+}
+
+.footer__left {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+}
+
+.footer__logo > a {
+	text-decoration: none;
+	font-weight: 500;
+	font-size: 1.5rem;
+}
+
+.footer--cv {
+	@media only print {
+		display: none;
+	}
+}

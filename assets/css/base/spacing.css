@@ -1,0 +1,22 @@
+:root {
+	--space-base: 1rem;
+	--space-1: calc(var(--space-base) * 0.25);
+	--space-2: calc(var(--space-base) * 0.5);
+	--space-3: calc(var(--space-base) * 0.75);
+	--space-4: calc(var(--space-base) * 1.0);
+	--space-5: calc(var(--space-base) * 1.5);
+	--space-6: calc(var(--space-base) * 2.0);
+	--space-7: calc(var(--space-base) * 3.0);
+	--space-8: calc(var(--space-base) * 4.0);
+	--space-9: calc(var(--space-base) * 6.0);
+	--space-10: calc(var(--space-base) * 8.0);
+	--space-11: calc(var(--space-base) * 12.0);
+	--space-12: calc(var(--space-base) * 20.0);
+
+	--max-content-width: 70ch;
+
+	--border-radius: 2px;
+
+	--header-height: 60px;
+	--footer-margin: var(--space-6);
+}
