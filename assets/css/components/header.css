@@ -25,9 +25,17 @@
 	font-size: 1.1rem;
 }
 
-.header__right {
+.header__nav {
 	display: flex;
 	gap: var(--space-4);
 	align-items: center;
 }
 
+.header__nav > .header__link {
+	display: none;
+	color: var(--color-fg);
+
+	@media only screen and (min-width: 800px) {
+		display: block;
+	}
+}

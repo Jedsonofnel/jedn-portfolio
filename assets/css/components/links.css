@@ -1,10 +1,9 @@
 a:not(.btn):not(.link__ui) {
-	font-weight: 500;
+	font-weight: 400;
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
 	text-decoration-color: var(--color-fg);
 	text-underline-offset: 2px;
-	display: inline-block;
 	transition: all 150ms ease;
 	position: relative;
 
