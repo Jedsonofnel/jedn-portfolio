@@ -3,7 +3,7 @@
 <script src="/assets/wasm/{{ include.project }}/wasm_exec.js?v={{ timestamp }}"></script>
 
 <script>
-const go = new Go();
-WebAssembly.instantiateStreaming(fetch("/assets/wasm/{{ include.project }}/main.wasm"), go.importObject)
-	.then((result) => go.run(result.instance));
+	const go = new Go();
+	WebAssembly.instantiateStreaming(fetch("/assets/wasm/{{ include.project }}/main.wasm"), go.importObject)
+		.then((result) => go.run(result.instance));
 </script>

@@ -1,13 +1,33 @@
 .header {
-	border: 2px solid var(--color-fg);
+	border-bottom: 2px solid var(--color-fg);
 	border-radius: var(--border-radius);
 	width: 100%;
-	display: flex;
 	padding: var(--space-2) var(--space-5);
-	margin: var(--space-4) 0;
+	margin-bottom: var(--space-4);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	@media only screen and (min-width: 800px) {
+		border: 2px solid var(--color-fg);
+		margin: var(--space-4) 0;
+	}
 }
 
-.header__logo > a {
-	font-weight: 500;
-	text-decoration: none;
+.header--cv {
+	@media only print {
+		display: none;
+	}
 }
+
+.header__logo {
+	font-weight: 500;
+	font-size: 1.1rem;
+}
+
+.header__right {
+	display: flex;
+	gap: var(--space-4);
+	align-items: center;
+}
+

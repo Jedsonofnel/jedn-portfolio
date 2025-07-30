@@ -2,11 +2,13 @@
 	<div class="footer__left">
 		<div class="footer__logo">
 			{% assign subgenre_title = page.subgenre_title | default: layout.subgenre_title | default: "JEDN | Portfolio" %}
-			<a href="/">{{ subgenre_title }}</a>
+			{{ subgenre_title }}
 		</div>
 	</div>
 
-	<nav class="footer__right">
+	<nav class="footer__right" id="menu">
+		<h4 class="footer-header">Menu</h4>
+		<a href="#">To top</a>
 		<ul class="footer__nav-ul">
 			{% for item in site.data.footer_navigation %}
 				<li>

@@ -1,5 +1,5 @@
 /* light mode default colors */
 :root {
-	--color-fg: hsl(0 0% 0%);
+	--color-fg: hsl(220 35% 15%);
 	--color-bg: hsl(0 0% 100%);
 }

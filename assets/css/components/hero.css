@@ -6,7 +6,7 @@
 
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	background-image: url("/assets/images/hero-background.svg");
+	background-image: url("../../images/hero-background.svg");
 	background-position: top right;
 	border-radius: var(--border-radius);
 	background-repeat: no-repeat;
@@ -32,11 +32,24 @@
 	display: inline-block;
 	align-self: center;
 	line-height: 1;
-	font-size: 1.5rem;
+	font-size: 1.1rem;
 	justify-self: start;
 	grid-column: 1 / 2;
 	color: var(--color-bg);
-	border-top: 8px solid currentColor;
+	border-top: 4px solid currentColor;
+
+	@media only screen and (min-width: 800px) {
+		font-size: 1.5rem;
+		border-width: 8px;
+	}
+}
+
+.hero__menu-button {
+	display: inline-block;
+	grid-column: 2 / 3;
+	justify-self: end;
+	align-self: center;
+	padding: var(--space-4);
 }
 
 .hero__title-blank {
@@ -147,44 +160,6 @@
 	padding-right: var(--space-2);
 }
 
-.cta--primary,
-.cta--outline {
-	text-transform: uppercase;
-	padding: var(--space-2);
-	border: 2px solid var(--color-fg);
-	border-radius: var(--border-radius);
-	background-color: var(--color-fg);
-	text-decoration: none;
-	text-align: right;
-	color: var(--color-bg);
-	font-size: 1rem;
-	transition: all 150ms ease;
-
-	@media only screen and (min-width: 800px) {
-		font-size: 1.25rem;
-	}
-
-	&:hover,
-	&:active {
-		background-color: var(--color-bg);
-		color: var(--color-fg);
-	}
-
-	&:active {
-		transform: scale(0.98);
-	}
-}
-
-.cta--outline {
-	background-color: var(--color-bg);
-	color: var(--color-fg);
-
-	&:hover,
-	&:active {
-		background-color: var(--color-fg);
-		color: var(--color-bg);
-	}
-}
 
 .hero__bullets {
 	list-style: none;

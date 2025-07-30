@@ -42,16 +42,20 @@ footer::after {
 	gap: var(--space-4);
 }
 
-.footer__logo > a {
-	text-decoration: none;
+.footer__logo {
 	font-weight: 500;
-	font-size: 1.5rem;
+	font-size: 1.25rem;
 }
 
 .footer--cv {
 	@media only print {
 		display: none;
 	}
+}
+
+.footer-header {
+	font-size: 1.2rem;
+	margin-bottom: var(--space-2);
 }
 
 .footer__nav-ul {

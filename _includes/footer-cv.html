@@ -1,11 +1,13 @@
 <footer class="footer footer--grid footer--cv">
 	<div class="footer__left">
 		<div class="footer__logo">
-			<a href="/">{{ page.title }}</a>
+			{{ page.title }}
 		</div>
 
 		<div>
-			<a href="javascript:window.print()" class="btn--outline">Download as PDF</a>
+			<button type="button" onclick="window.print()" class="btn btn--outline">
+				Download as PDF
+			</button>
 		</div>
 	</div>
 
@@ -19,4 +21,3 @@
 		</ul>
 	</nav>
 </footer>
-

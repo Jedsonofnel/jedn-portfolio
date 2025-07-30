@@ -1,0 +1,54 @@
+a:not(.btn):not(.link__ui) {
+	font-weight: 500;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-decoration-color: var(--color-fg);
+	text-underline-offset: 2px;
+	display: inline-block;
+	transition: all 150ms ease;
+	position: relative;
+
+	&:hover {
+		text-decoration-thickness: 4px;
+	}
+
+	&:active::after {
+		content: "";
+		position: absolute;
+		inset: -4px;
+		border: 2px solid var(--color-fg);
+		border-radius: var(--border-radius);
+		pointer-events: none;
+	}
+}
+
+.hamburger-icon {
+	display: block;
+	height: 10px;
+	width: 20px;
+	border-top: 2px solid var(--color-fg);
+	border-bottom: 2px solid var(--color-fg);
+	transition: all 150ms ease;
+}
+
+.hamburger-icon--hero {
+	border-width: 4px;
+	width: 40px;
+	height: 20px;
+}
+
+a:hover > .hamburger-icon {
+	height: 14px;
+}
+
+a:active > .hamburger-icon {
+	border-width: 3px;
+}
+
+a:hover > .hamburger-icon--hero {
+	height: 28px;
+}
+
+a:active > .hamburger-icon--hero {
+	border-width: 6px;
+}

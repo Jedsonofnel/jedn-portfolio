@@ -1,6 +1,6 @@
-.btn,
-.btn--outline {
+.btn {
 	display: inline-flex;
+	align-items: center;
 	border: 2px solid var(--color-fg);
 	background-color: var(--color-fg);
 	border-radius: var(--border-radius);
@@ -9,6 +9,8 @@
 	text-decoration: none;
 	color: var(--color-bg);
 	transition: all 150ms ease;
+	position: relative;
+	cursor: pointer;
 
 	&:hover,
 	&:active {
@@ -18,6 +20,11 @@
 
 	&:active {
 		transform: scale(0.98);
+	}
+
+	&::before,
+	&::after {
+		transition: all 150ms ease;
 	}
 }
 
@@ -29,5 +36,60 @@
 	&:active {
 		background-color: var(--color-fg);
 		color: var(--color-bg);
+	}
+}
+
+.btn--cta {
+	text-transform: uppercase;
+	justify-content: end;
+
+	@media only screen and (min-width: 800px) {
+		font-size: 1.25rem;
+	}
+}
+
+.btn--bracketed {
+	border: none;
+	background: none;
+	color: var(--color-fg);
+	padding: var(--space-2) 0;
+	font-family: var(--font-mono);
+	font-weight: 500;
+	text-transform: uppercase;
+
+	&::before,
+	&::after {
+		position: absolute;
+		font-family: var(--font-family);
+		font-size: 1.5rem;
+		font-weight: 500;
+	}
+
+	&:hover {
+		font-style: italic;
+	}
+
+	&::before {
+		content: "[";
+		right: 100%;
+	}
+
+	&::after {
+		content: "]";
+		left: 100%;
+	}
+
+	&:hover::before {
+		right: calc(100% + 4px);
+		font-style: normal;
+	}
+
+	&:hover::after {
+		left: calc(100% + 4px);
+		font-style: normal;
+	}
+
+	&:active {
+		transform: scale(0.98);
 	}
 }
