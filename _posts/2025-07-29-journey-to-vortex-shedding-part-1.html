@@ -3,16 +3,16 @@ layout: post
 ---
 
 <p>Part 1 of my quest to build a cool real-time fluid sim that displays vortex
-shedding.</p>
+	shedding.</p>
 
 <p>This is a simulation (happening in your browser!) of smoke particles
-diffusing around some box.  I've set a source near the middle of smoke
-particles being inserted (per second), as well as some other boundary
-conditions.  It's all done in go and compiled to WASM with TinyGo and so it
-runs pretty speedily in the browser. I think it's a compelling demonstration of
-the web as a first-class platform for app distribution, and I'm excited to see
-how it may eventually come to usurp traditional native applications in the
-future.</p>
+	diffusing around some box. I've set a source near the middle of smoke
+	particles being inserted (per second), as well as some other boundary
+	conditions. It's all done in go and compiled to WASM with TinyGo and so it
+	runs pretty speedily in the browser. I think it's a compelling demonstration of
+	the web as a first-class platform for app distribution, and I'm excited to see
+	how it may eventually come to usurp traditional native applications in the
+	future.</p>
 
 <p><em>The simulation itself:</em></p>
 
@@ -20,18 +20,18 @@ future.</p>
 	<canvas id="cfd-canvas" width="800" height="600" class="wasm-canvas"></canvas>
 	<div class="wasm-canvas__stats-container">
 		<div id="cfd-fps">FPS: --</div>
-        <div id="cfd-time">Time: 0.00s</div>
-        <div id="cfd-max-concentration">Max φ: 0.00</div>
+		<div id="cfd-time">Time: 0.00s</div>
+		<div id="cfd-max-concentration">Max φ: 0.00</div>
 	</div>
 </div>
 
 {% include wasm-loader.html project="cfd-sim-v0.1" %}
 
 <p>As you can see, it reaches a sort of steady-state reasonably quickly, when the
-sources get balanced out by the sinks.  Even though it's pretty basic stuff
-it's still pretty cool to go from your classic finite-volume method with
-linear piecewise discretisation for diffusion that you read about in a textbook to 
-something "real" you can watch.  I think what elevates this code from the bulk
-of undergrad projects is that I did the time discretisation as well and so
-it's a "moving" visualisation and is a bit more exciting than your classic
-matplotlib heatmap.</p>
+	sources get balanced out by the sinks. Even though it's pretty basic stuff
+	it's still pretty cool to go from your classic finite-volume method with
+	linear piecewise discretisation for diffusion that you read about in a textbook to
+	something "real" you can watch. I think what elevates this code from the bulk
+	of undergrad projects is that I did the time discretisation as well and so
+	it's a "moving" visualisation and is a bit more exciting than your classic
+	matplotlib heatmap.</p>
