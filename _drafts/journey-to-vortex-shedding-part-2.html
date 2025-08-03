@@ -1,0 +1,333 @@
+---
+layout: post
+---
+
+<p>
+	How some object-oriented prinicples inspired me to fully refactor my codebase to
+	fully remove all conditionals in my rendering loop and all the benefits that
+	come with this new approach.
+</p>
+
+<p>
+	<em>Context: I'm working on a live CFD simulation that runs in the browser that 
+		can display physically-realistic vortex shedding.  See the
+		(first post)[] for a full introduction.</em>
+</p>
+
+<hr>
+
+<h2>Motivation for the Refactor</h2>
+
+<p>
+	Describe the mass of conditionals in previous implementation and how annoying
+	it was to add new features. Then describe watching that sandi metz conference
+	talk (and link it) and the reveleation of the new paradigm of "contitionals only
+	in factory methods". Then I could make my hot loop purely declarative and so easy
+	to add/change things and maintain. Idea of "pass smarter objects".
+</p>
+
+<h2>The Original Implementation</h2>
+
+<p>
+	I think the main thing I'd like to illustrate is that now my code is a lot
+	more declarative. Rather than check if every cell is at a certain boundary
+	during the hot loop, the assembly code actually gets a lot more "dumb".  All
+	it needs to know is that a cell has some neighbours who can provide a
+	coupling coefficient, an off diagonal contribution and an RHS contribution.
+	This is a great illustration of polymorphism or "role playing":  A neighbour
+	is defined by its behaviours rather than its internal data.
+</p>
+
+<p>
+	The following code is from my original proof of concept with WASM implementation.
+	While the conditional chain for handling boundary conditions has been split off into its
+	own function, all this does is reduce function length by moving code somewhere else.
+	Even though the function isn't overly long it is still a hot mess - there are a 
+	number of code smells.  Have a look and see what you think:
+</p>
+
+<pre><code class="code code--block">// Some code from my original implementation
+func (bc *BoundaryConditions) HandleBoundaryRHS(
+		i, j, nx, ny int, aE, aW, aN, aS, dx, dy float64
+	) float64 {
+	rhs := 0.0
+
+	if j == nx-1 { // East boundary
+		rhs += bc.getRHSContribution(East, aE, dy)
+	}
+	if j == 0 { // West boundary
+		rhs += bc.getRHSContribution(West, aW, dy)
+	}
+	if i == 0 { // North boundary
+		rhs += bc.getRHSContribution(North, aN, dx)
+	}
+	if i == ny-1 { // South boundary
+		rhs += bc.getRHSContribution(South, aS, dx)
+	}
+
+	return rhs
+}
+</code></pre>
+
+<p>
+	Granted, I am not a pro by any means BUT I've been on a bit of a clean
+	code crusade recently and to my eye the two key smells that suggest a
+	refactor is in order are:
+</p>
+
+<ol>
+	<li><strong>The long conditional chain.</strong>
+		It's hard to fully articulate why this is a smell but in non-setup/config
+		code large amounts of if/else statements indicate you should have passed
+		the function a "smarter thing".
+	</li>
+
+	<li><strong>The super long parameter list.</strong>
+		This says the function knows about too much OR that these parameters
+		could be condensed into, ditto, a "smarter thing".
+	</li>
+</ol>
+
+<p>
+	I think the helpfulness of code smells is that they alert you to the need for
+	a refactor without you having to properly read or understand the code.  In this
+	case I think it's pretty easy to glance at this function and realise it needs more
+	investigation.  Take a closer look at this line:
+</p>
+
+<pre><code class="code code--block">if j == nx-1 { // East boundary
+	rhs += bc.getRHSContribution(East, aE, dy)
+}
+</code></pre>
+
+<p>
+	Firstly, to check if the cell in question is at the east boundary of our
+	simulation the code needs to know the overall dimensions (nX, nY) of our
+	structured mesh! Secondly, it is <em>very tightly coupled</em> to our mesh
+	data structure, which is an array of arrays, where each sub-array corresponds
+	to a column and the parent array rows (eg. mesh[0][1] corresponds to the cell
+	in the top row 2nd column).  If we wanted to implement an unstructured mesh
+	this code wouldn't work at all and would have to be completely refactored.
+	Another issue is that every cell will be checked to see if it's a boundary on
+	every loop when this will never change from setup.
+</p>
+
+<p>
+	Hopefully it's at least slightly obvious that this procedural approach to my
+	equation assembly is not sustainable and makes the code increasingly hard
+	to extend or adapt.  When I explain the declarative alternative it should
+	make the previous example more obviously bad!
+</p>
+
+<h2>The New Paradigm</h2>
+
+<p>
+	Honestly you should probably just watch Sandi's talk to understand this a lot
+	better but my refactor was based on the following key principles:
+</p>
+
+<ol>
+	<li>Anthropomorphism</li>
+	<li>Polymorphism/role playing</li>
+	<li>Factory methods (are awesome!)</li>
+</ol>
+
+<h3>Anthropomorphism</h3>
+
+<p>
+	I think of anthropomorphism in two parts, which are that code and data should
+	belong together in objects AND these objects should be named well.  In
+	contrast to strictly procedural code (ie no objects) anthropomorphism allows
+	us to reason about our code in much more expressive ways.  For example, I
+	think a lot of the problems I was having with the previous code was I was
+	thinking about it in strictly a procedural way:  "I need to get the cell,
+	then check if it's at a bounday, then add the right bits to our system of
+	equations" etc.  In contrast, an object-oriented anthropomorphic approach
+	says: "A <em>Cell</em> has some <em>Neighbours</em> which all give
+	<em>Contributions</em> to the system".  Then it's much easier to reason about
+	the whole process:  for each cell I need to get the contributions from each
+	neighbour and add them to the system.
+</p>
+
+<p>
+	This may just seem like semantics but the key difference is that if you think
+	in terms of anthropomorphised (ie named) objects, then you can separate out
+	implementation details. For example, a <em>Cell</em> doesn't need to understand
+	how a <em>Neighbour</em> figures out what <em>Contribution</em> to provide.
+	This gives me a great framework for being intentional about how my my objects
+	interact with each other - exactly what bits of data do I need to exchange?
+	As an aside this is where a strongly typed language like Go has an advantage over
+	something like Ruby as it makes these contracts very explicity.  This is slightly
+	ironic as Go doesn't have the concept of classes like most "OOP languages" but
+	so far I've found implementing OOP approaches in Go has been a joy.
+</p>
+
+<h3>Polymorphism (Role Playing)</h3>
+
+<p>So far, with just anthropomorphism, we could write code like this:</p>
+
+<pre><code class="code code--block">
+	type Cell struct {
+		position tensor.Vec2
+		phi float32
+		internalNeighbours []InternalNeighbour
+	}
+</code></pre>
+
+<h3>Factory Methods</h3>
+
+<!--prettier-ignore -->
+<pre><code class="code code--block">// field.go
+func (f *Field) AssembleSystem(dt float32) *solver.System {
+	nCells := len(f.cells)
+	matrix := f.system.Matrix
+	rhs := f.system.RHS
+
+	for i, cell := range f.cells {
+		diagonal := cell.timeCoeff / dt
+		b := cell.timeCoeff / dt * cell.Phi
+
+		for _, n := range cell.neighbours {
+			diagonal += n.CouplingCoefficient()
+			b += n.RHSContribution()
+			n.ApplyOffDiagonalContribution(matrix, i, nCells)
+		}
+		matrix.Set(i, i, diagonal)
+		rhs[i] = b
+	}
+
+	for i, src := range f.sources {
+		matrix.Add(i, i, src.DiagonalContribution())
+		rhs[i] += src.RHSContribution()
+	}
+
+	return f.system
+}
+</code></pre>
+
+<h2>
+	Refactoring for branchless hot loop
+</h2>
+
+<div class="wasm-canvas__container">
+	<fieldset id="cfd-params">
+		<legend>Simulation Paramaters</legend>
+
+		<div>
+			<label for="field">Field</label>
+			<input id="field" name="field" type="text" value="aluminiumTemp" readonly />
+		</div>
+
+		<div>
+			<label for="field-init">Starting Value</label>
+			<input id="field-init" name="field-init" type="number" value="20" readonly />
+		</div>
+
+		<fieldset id="boundary">
+			<legend>Boundary Dimensions</legend>
+
+			<div>
+				<label for="width">Width (m)</label>
+				<input id="width" name="width" type="number" value="0.1" readonly />
+			</div>
+
+			<div>
+				<label for="height">Height (m)</label>
+				<input id="height" name="height" type="number" value="0.05" readonly />
+			</div>
+		</fieldset>
+
+		<fieldset id="bbc">
+			<legend>Border Boundary Conditions</legend>
+
+			<fieldset id="north">
+				<legend>North Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0">Dirichlet</option>
+						<option value="1" selected>Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="east">
+				<legend>East Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0" selected>Dirichlet</option>
+						<option value="1">Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="south">
+				<legend>South Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0">Dirichlet</option>
+						<option value="1" selected>Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="west">
+				<legend>West Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0" selected>Dirichlet</option>
+						<option value="1">Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="200" readonly />
+				</div>
+			</fieldset>
+		</fieldset>
+
+		<fieldset id="src">
+			<legend>Volumetric Point Source Config</legend>
+			<div>
+				<label for="magnitude">Strength (W/m³)</label>
+				<input id="magnitude" name="magnitude" type="number" value="5e9" readonly />
+			</div>
+
+			<div>
+				<label for="x-pos">X Position</label>
+				<input id="x-pos" name="x-pos" type="number" value="0.05" readonly />
+			</div>
+
+			<div>
+				<label for="y-pos">Y Position</label>
+				<input id="y-pos" name="y-pos" type="number" value="0.025" readonly />
+			</div>
+		</fieldset>
+	</fieldset>
+	<canvas id="cfd-canvas" width="800" height="400" class="wasm-canvas"></canvas>
+</div>
+
+{% include wasm-loader.html project="cfd-sim-dev" %}

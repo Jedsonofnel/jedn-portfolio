@@ -1,37 +1,230 @@
 ---
 layout: post
+title: "Journey to Vortex Shedding in the Browser: Part 1"
 ---
 
-<p>Part 1 of my quest to build a cool real-time fluid sim that displays vortex
-	shedding.</p>
+<p>
+	What is this project and why am I starting it? An introduction to this blog series
+	and a proof of concept for Golang and WebAssembly.
+</p>
 
-<p>This is a simulation (happening in your browser!) of smoke particles
-	diffusing around some box. I've set a source near the middle of smoke
-	particles being inserted (per second), as well as some other boundary
-	conditions. It's all done in go and compiled to WASM with TinyGo and so it
-	runs pretty speedily in the browser. I think it's a compelling demonstration of
-	the web as a first-class platform for app distribution, and I'm excited to see
-	how it may eventually come to usurp traditional native applications in the
-	future.</p>
+<hr>
 
-<p><em>The simulation itself:</em></p>
+<h2>What is vortex shedding?</h2>
 
-<div class="wasm-canvas__container">
-	<canvas id="cfd-canvas" width="800" height="600" class="wasm-canvas"></canvas>
+<p>Vortex shedding looks like this:</p>
+
+<figure>
+	<img src="/assets/images/vortex-shedding.png" alt="A picture of karman vortices being shed behind a cylinder" />
+	<figcaption>Kármán vorex street behind a circular cylinder at R=140 
+		<a href="#fn:1" class="footnote" id="fnref:1" rel="footnote" role="doc-noteref">1</a>
+	</figcaption>
+</figure>
+
+<p>
+	In brief it's when a fluid travels at a specific speed around some body that causes
+	vortices (the swirly bits) in this specific alternating pattern. It's a
+	very pretty phenomena and tends to feature on "Welcome to Fluid Mechanics" lectures
+	and other introductory material as it's a classic bit of fluid mechanics imagery.
+</p>
+
+<h2>And so what are you trying to accomplish?</h2>
+
+<p>
+	I'd love to create a live fluid simulation displaying the vortex shedding
+	phenomenon that runs live in the browser. I'm sure there are other cool
+	phenemona to aim towards but this one is pretty and I think it'd be cool!
+	It's also a great excuse to revive an old computational fluid dynamics (CFD)
+	project I started a while back and to learn more about various algorithms and
+	techniques. You can
+	<a href="/2025/07/28/interactive-cfd-with-python-and-pygame.html">read here</a>
+	about the start of my interest in homemade CFD if you'd like.
+</p>
+
+<p>
+	On the technical side, my goal is to <strong>render and simulate everything
+		fully on the browser</strong>. This is because I'm increasingly convinced
+	that the internet is becoming a first-class platform for sharing and running
+	applications and so building a web-first CFD code (albeit rather basic) would
+	be a great proof of concept and an excuse to learn! What I mean by this is that
+	generally, if one wanted to run some Serious Software TM (think Solidworks or
+	Abaqus), one would have to install it onto their computer and run it there.
+	However, now that computers are getting more powerful and with the advent
+	of WebAssembly, the remit of web-based apps are expanding beyond just basic
+	Create, Read, Update and Destroy (CRUD) apps that just move data around on a
+	database. The first example that comes to mind is Onshape, which is a
+	full-featured CAD program that runs entirely on the browser: This is what
+	I mean by first-class app platform.
+</p>
+
+<h2>A proof of concept</h2>
+
+<p>
+	I'm not sure who said it first but a common bit of advice one hears for
+	software project is "Do the scary part first" and I find that so helpful. So
+	much so I'll give it its own blockquote:
+</p>
+
+<blockquote>
+	<p>Do the scary part first.</p>
+</blockquote>
+
+<p>
+	What this means is it's helpful to tackle the unknown bit of the project first
+	before doing all the work that you already know how to do. For me I'm pretty
+	happy with Golang and I have a vague understanding of where I want to go for
+	the fluid mechanics parts, but rendering things in the browser with Golang was
+	fully unknown to me, and so my first job was to get something rendered.
+	Using my previous python project
+	(<a href="/2025/07/28/interactive-cfd-with-python-and-pygame.html">see here</a>)
+	I quickly ported the code to Go and then set to work figuring out the rendering bit.
+	It turns out that it's really not so bad - there's a nice library for calling
+	javascript from Go and you have to learn how the html <code class="code">&ltcanvas&gt</code> element works
+	and that's about it.
+</p>
+
+<figure class="wasm-canvas__container" id="cool-part">
 	<div class="wasm-canvas__stats-container">
+		<h3>Diffusion Simulation</h3>
 		<div id="cfd-fps">FPS: --</div>
 		<div id="cfd-time">Time: 0.00s</div>
 		<div id="cfd-max-concentration">Max φ: 0.00</div>
 	</div>
-</div>
+
+	<canvas id="cfd-canvas" width="800" height="600" class="wasm-canvas"></canvas>
+
+	<figcaption>
+		A 2D diffusion simulation of smoke concentration with a constant
+		source set off-centre and some arbritrary Dirichlet and Neumann boundary
+		conditions set on the borders for visual interest.
+	</figcaption>
+</figure>
 
 {% include wasm-loader.html project="cfd-sim-v0.1" %}
 
-<p>As you can see, it reaches a sort of steady-state reasonably quickly, when the
-	sources get balanced out by the sinks. Even though it's pretty basic stuff
-	it's still pretty cool to go from your classic finite-volume method with
-	linear piecewise discretisation for diffusion that you read about in a textbook to
-	something "real" you can watch. I think what elevates this code from the bulk
-	of undergrad projects is that I did the time discretisation as well and so
-	it's a "moving" visualisation and is a bit more exciting than your classic
-	matplotlib heatmap.</p>
+<h2>Future work</h2>
+
+<p>
+	My rough plan for getting to vortex shedding is as follows:
+</p>
+
+<ol>
+	<li>Work out a proper architecture for the codebase that promotes extensibility</li>
+	<li>Add treament of convection terms</li>
+	<li>Implement a solving algorithm to replace Gauss-Seidel</li>
+	<li>Design a robust geometry handling layer for different grids (eg unstructured)</li>
+	<li>Implement the SIMPLE algorithm for momentum conservation and velocity solutions</li>
+	<li>Add in geometries with boundaries inside the simulation</li>
+	<li>Anything else needed for vortex shedding - eg. boundary layer considerations</li>
+	<li>Vortex shedding!</li>
+</ol>
+
+<p>
+	One point I'd love to prove is that you <em>can run sophisticated application code</em>
+	in a performant way in the browser using WASM and so throughout the project I'm keen
+	to take the time to incrementally optimise things and ensure the simulation stays
+	speedy. Obviously premature optimisation is a classic way to kneecap any progress
+	but I think a wise cycle of getting a feature to work before thinking about low-hanging
+	optimisations will be achievable.  I'm particularly keen on this as in traditional web
+	development the problems are never complex enough to have to think hard about data
+	structures and algorithms so this is a good excuse to do some more sophisticated programming.
+</p>
+
+<h2>How can I do something similar myself?</h2>
+
+<p>
+	To use Go with WASM it's really as simple as:	
+</p>
+
+<pre><code class="code code--block language-go">//go:build wasm
+package main
+
+import "syscall/js"
+
+func main() {
+	canvasID := "canvas-id"
+	canvas := js.Global().Get("document").Call("getElementById", canvasID)
+	ctx := canvas.Call("getContext", "2d")
+	r.ctx.Set("fillStyle", "rgb(0,255,0)")
+	r.ctx.Call("fillRect", 0, 0, 20, 20)
+	// do anything you want really with the canvas
+}
+</code></pre>
+
+<p>
+	Use TinyGo to compile it into a really small binary (with a restriction on
+	what libraries you can use) and then put the resulting files (a .wasm and .js)
+	into your website assets.  I made a little Makefile to do this automatically
+	for me in development which works really well.
+</p>
+
+<pre><code class="code code--block"># Set this when manually building
+VERSION ?= dev
+TARGET_DIR = ../../assets/wasm/cfd-sim-$(VERSION)
+
+.PHONY: build dev clean clean-all
+
+build:
+	mkdir -p $(TARGET_DIR)
+	tinygo build -o $(TARGET_DIR)/main.wasm -target wasm .
+	cp $$(tinygo env TINYGOROOT)/targets/wasm_exec.js $(TARGET_DIR)/
+
+dev:
+	$(MAKE) build VERSION=dev
+	find . -name "*.go" | entr -r $(MAKE) build VERSION=dev
+
+clean:
+	rm -rf $(TARGET_DIR)
+
+clean-all:
+	rm -rf ../../assets/wasm/cfd-sim-*
+</code></pre>
+
+<p>
+	And then to import this into an html file I made the following little partial
+	for my Jekyll site:
+</p>
+
+<pre><code class="code code--block">&#123% assign timestamp = site.time | date: '%s' %&#125
+
+&ltscript src="/assets/wasm/&#123&#123 include.project &#125&#125/wasm_exec.js?v=&#123&#123 timestamp &#125&#125"&gt&lt/script&gt
+
+&ltscript&gt
+	const go = new Go();
+	WebAssembly.instantiateStreaming(fetch("/assets/wasm/&#123&#123 include.project &#125&#125/main.wasm"), go.importObject)
+		.then((result) =&gt go.run(result.instance));
+&lt/script&gt
+</code></pre>
+
+<p>
+	The timestamp variable is for cache busting, as it means the script src
+	attribute will change every time I deploy the jekyll site, forcing the
+	browser to fetch the latest version of the script.  To use this on any page, 
+	I can just put:
+</p>
+
+<pre><code class="code code--block language-html">&ltcanvas id="canvas-id" width="800" height="600"&gt&ltcanvas&gt
+&#123% include wasm-loader.html project="cfd-sim-dev" %&#125
+</code></pre>
+
+<p>
+	That's a brief overview of how I'm doing WASM development for this project.
+	So far with the jekyll livereloading and my file watching in the make dev
+	command it's been really easy to develop and iterate!
+</p>
+
+<hr>
+
+<h2>References</h2>
+
+<div class="footnotes">
+	<ol>
+		<li id="fn:1">
+			<p>
+				Van Dyke, Milton. "Vortices", in <em>An Album of Fluid Motion</em>.
+				Stanford, CA: Parabolic Press, 1982. pp 96.
+				<a class="reversefootnote" href="#fnref:1" role="doc-backlink">↩</a>
+			</p>
+		</li>
+	</ol>
+</div>

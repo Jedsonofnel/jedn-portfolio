@@ -1,4 +1,4 @@
-a:not(.btn):not(.link__ui) {
+a:not(.btn):not(.link__ui):not(.footnote) {
 	font-weight: 400;
 	text-decoration: underline;
 	text-decoration-thickness: 2px;
@@ -8,7 +8,7 @@ a:not(.btn):not(.link__ui) {
 	position: relative;
 
 	&:hover {
-		text-decoration-thickness: 4px;
+		text-decoration-thickness: 3px;
 	}
 
 	&:active::after {

@@ -1,0 +1,13 @@
+.code {
+	tab-size: 4;
+	font-family: var(--font-mono);
+	font-size: 1rem;
+}
+
+.code--block {
+	border-radius: var(--border-radius);
+}
+
+pre:has(>code.code--block) {
+	margin: var(--space-4) 0;
+}

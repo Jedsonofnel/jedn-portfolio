@@ -23,7 +23,7 @@ be a suitable starter project.  Thus began my side-dabble into homemade CFD.
 It goes without saying that I was totally way out of my depth and so early on I
 realised that if I was going to get anything done I would have to pivot to
 doing it in Python. Another big breakthrough was finding the 1980 textbook
-"Numerical Heat Transfer and Fluid Flow", by Suhas Patankar who worked closely
+"Numerical Heat Transfer and Fluid Flow" [^1], by Suhas Patankar who worked closely
 with Spalding at Imperial (big up IC) to originally develop the SIMPLE
 algorithm.  This textbook presents the finite volume discretisation of various
 transport equations in a really nice incremental way and I was able to follow
@@ -48,15 +48,25 @@ me an afternoon to learn and to read through the docs.  My first usage was a
 cool rendering of the 1D heat equation with an unsteady term and customisable
 heat transfer coefficients.
 
-![1D heat transfer simulation gif](/assets/images/1D-heat-diffusion-gif.gif)
-*The 1D heat transfer simulation screen*
+<figure>
+    <img src="/assets/images/1D-heat-diffusion-gif.gif" 
+        alt="The 1D heat transfer simulation screen"/>
+    <figcaption>
+        The 1D heat transfer simulation screen
+    </figcaption>
+</figure>
 
 I then went on to make it 2D and add advection using a basic upwind differencing
 scheme, as well as using pygame to get a mouse input and set the grid to be a
 source if pressed on.
 
-![My dye source in the presence of a flow field simulation](/assets/images/2D-python-cfd.gif)
-*The 2D interactive advection/diffusion program*
+<figure>
+    <img src="/assets/images/2D-python-cfd.gif" 
+        alt="My dye source in the presence of a flow field simulation"/>
+    <figcaption>
+        The 2D interactive advection/diffusion program
+    </figcaption>
+</figure>
 
 The bulk fluid velocity that is causing the "dye", in this case, to be advected
 is not calculated using momentum conservation, rather is uniform across the
@@ -69,8 +79,13 @@ that upwind differencing was a suitable interpolation scheme and added some of
 the data live to the simulation to make it more Sciencey TM. The following
 is the result:
 
-![Same simulation but with extra UI](/assets/images/2D-python-cfd-with-ui.gif)
-*The 2D program with some variables displayed live*
+<figure id="cool-part">
+    <img src="/assets/images/2D-python-cfd-with-ui.gif" 
+        alt="Same simulation but with extra UI"/>
+    <figcaption>
+        The 2D program with some variables displayed live
+    </figcaption>
+</figure>
 
 The Peclet number is so large because I used a value of diffusivity for a specific red
 food dye of 1e-6.  As the diffusivity is in the quotient of the Peclet Number
@@ -117,3 +132,10 @@ the state of this little hobby.
 As I go forward with my "Journey to Vortex Shedding" series this is a good
 reminder to be smart about setting achievable "Sub Goals" that have their own
 Sub Cool-Outcomes so that I don't run out of steam.
+
+---
+
+## References
+
+[^1]: S. V. Patankar, *Numerical Heat Transfer and Fluid Flow*. Boca Raton,
+    FL: CRC Press LLC, Taylor & Francis Group, 2009.
