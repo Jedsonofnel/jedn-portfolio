@@ -1,6 +1,6 @@
 --- 
 layout: post 
-title: Building an interactive fluid sim with python and pygame
+title: Building an Interactive Fluid Sim with Python and Pygame
 ---
 
 How I got my feet wet with CFD fundamentals and was able to quickly do

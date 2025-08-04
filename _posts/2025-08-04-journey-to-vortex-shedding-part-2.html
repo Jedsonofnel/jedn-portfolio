@@ -1,0 +1,424 @@
+---
+layout: post
+title: "Journey to Vortex Shedding in the Browser: Part 2"
+---
+
+<p>
+	How some object-oriented principles inspired me to fully refactor my codebase to
+	fully remove all conditionals in my rendering loop and all the benefits that
+	come with this new approach.
+</p>
+
+<p>
+	<em>Context: I'm working on a live CFD simulation that runs in the browser, with
+		a goal to display physically-realistic vortex shedding.  See the
+		<a href="/2025/07/29/journey-to-vortex-shedding-part-1.html">first post</a>
+		 for a full introduction.</em>
+</p>
+
+<hr>
+
+<h2>Motivation for the Refactor</h2>
+
+<p>
+	My code was quickly becoming a mess where each component was very tightly coupled
+	to the implementation of different components.  For example my equation assembly
+	code had knowledge of the data structure used by my mesh, as shown in the following
+	code where I'm comparing array indices with the structured mesh array's dimensions
+	to check for boundaries.
+</p>
+
+<pre><code class="code code--block">// Some code from my original implementation
+func (bc *BoundaryConditions) HandleBoundaryRHS(
+		i, j, nx, ny int, aE, aW, aN, aS, dx, dy float64
+	) float64 {
+	rhs := 0.0
+
+	if j == nx-1 { // East boundary
+		rhs += bc.getRHSContribution(East, aE, dy)
+	}
+	if j == 0 { // West boundary
+		rhs += bc.getRHSContribution(West, aW, dy)
+	}
+	if i == 0 { // North boundary
+		rhs += bc.getRHSContribution(North, aN, dx)
+	}
+	if i == ny-1 { // South boundary
+		rhs += bc.getRHSContribution(South, aS, dx)
+	}
+
+	return rhs
+}
+</code></pre>
+
+<p>
+	If I wanted to change to an unstructured mesh with a totally different data structure
+	I'd have to change my entire codebase. Not only that but running the conditionals
+	every loop to check for boundary conditions was a total waste - a cell's boundaries
+	were not going to change between render loops and so that information should be
+	precomputed.  In short, my codebase looked a bit like this:
+</p>
+
+<figure>
+	<img src="/assets/images/vortex-shedding/pre-refactor-diagram.svg" 
+			alt="A diagram of the mess that was my proof of concept" />
+	<figcaption>
+		A visual representation of the tangled mess of my proof of concept.
+	</figcaption>
+</figure>
+
+<p>
+	Crucially the issue with the way things interacted was that it wasn't through
+	a well designed interface, but rather by messing with something else's
+	internal data. For example I had code similar to the following.
+</p>
+
+<pre><code class="code code--block language-go">// mesh.go
+type Mesh struct {
+	Phi   []float32
+	NX NY int
+	// etc...
+}
+
+
+// equations.go
+type Equation struct {
+	mesh *Mesh
+	// etc...
+}
+
+func (eq *Equation) Assemble() {
+	for index, cell := range eq.mesh.Phi {
+		if index == eq.mesh.NX {
+			// boundary stuff
+		}
+		// etc...
+	}
+}
+</code></pre>
+
+<p>
+	Clearly the Assemble function is using the internal data of the meshing struct
+	and so these two functionalities (meshing and equation assembly) become
+	very tightly coupled, making change extremely difficult.
+</p>
+
+<h2>So how do I fix this mess?</h2>
+
+<p>
+	I was hugely inspired by 
+	<a href="https://www.youtube.com/watch?v=YtROlyWWhV0">
+		this excellent Sandi Metz talk
+	</a>,
+	as I do a lot of OOP Ruby programming, and so I decided to translate the OOP principle of writing declarative code
+	using polymorphism into Golang. If you're interested in learning more there's no
+	way I can explain the theory better than Sandi in the above conference talk, so watch
+	that first, but I'll give an example of how it changed my code below.
+</p>
+
+<p>
+	I think a lot of the power in OOP principles lies in the act of taking time
+	to name objects and their behaviours properly, rather than sticking to a
+	procedural framework for functionality.  This simple exercise allows
+	you to define clear boundaries and relationships and make your code far more
+	declarative.  The boundary condition logic, for example, is one such case
+	where the procedure requires knowledge of different things:  Is the cell in
+	question touching a boundary?  Which boundary?  What boundary condition is
+	set for that boundary?  How should it effect the equations?  Having to contend
+	with all these is why the previous code was so tightly coupled - you do
+	need information about the mesh, geometry (face areas and centroid distances),
+	the field and the boundary conditions set by the user.  My trick for
+	disentangling this was to think:
+</p>
+
+<blockquote>
+	<p>
+		Each Cell has a number of Neighbours that all provide some Contribution to the
+		system.  Therefore to assemble the equation each cell needs to get contributions
+		from each of its neighbours.
+	</p>
+</blockquote>
+
+<p>
+	This may seem like just semantics but notice there is no mention of boundary conditions
+	or mesh details in this anthropomorphised account of the procedure.  The cell
+	doesn't need to know anything about whether its neighbours are boundaries or
+	where they live, it just needs to know how to get the neighbours contributions.
+	This allows us to write very declaritive code as in the following:
+</p>
+
+<pre><code class="code code--block">// field.go
+func (f *Field) AssembleSystem(dt float32) *solver.System {
+	nCells := len(f.cells)
+	matrix := f.system.Matrix
+	rhs := f.system.RHS
+
+	for i, cell := range f.cells {
+		diagonal := cell.timeCoeff / dt
+		b := cell.timeCoeff / dt * cell.Phi
+
+		// Notice there are no if/else statements
+		for _, n := range cell.neighbours {
+			diagonal += n.CouplingCoefficient()
+			b += n.RHSContribution()
+			n.ApplyOffDiagonalContribution(matrix, i, nCells)
+		}
+		matrix.Set(i, i, diagonal)
+		rhs[i] = b
+	}
+
+	for i, src := range f.sources {
+		matrix.Add(i, i, src.DiagonalContribution())
+		rhs[i] += src.RHSContribution()
+	}
+
+	return f.system
+}
+</code></pre>
+
+<p>
+	How come we don't have to write any if statements above?  Surely that logic
+	(whether a neighbour is a boundary) needs to belong somewhere?  The answer is
+	being intentional about writing factory methods that figure that out and decide
+	what sort of neighbours to pass to the cell.  This approach, leveraging
+	polymorphism with Go's interface system has changed the game for me, as I can
+	separate the code into a "setup" phase, where factory functions populate my data
+	structures with all the right sort of objects, and then my render loop (the "Hot
+	loop") can just rely on a thing's behavioural contract, rather than having to
+	figure out what sort of thing it is.  This approach is called "Tell don't ask"
+	and I've used to it <strong>fully eliminate any conditionals from my hot loop in my
+	new refactor.</strong>
+</p>
+
+<h3>A quick explanation of polymorphism in Go</h3>
+
+<p>
+	If you've not used Go's interfaces before or thought about duck typing, here's
+	a quick example using my boundary condition code.  We have a type of
+	interface which says "any object that has these methods is also a type of this":
+</p>
+
+<pre><code class="code code--block langauge-go">type Neighbour interface {
+	CouplingCoefficient() float32
+	ApplyOffDiagonalContribution(matrix *tensor.Matrix, cellIndex, nCells int)
+	RHSContribution() float32
+}
+</code></pre>
+
+<p>
+	And then we have an internal neigbour type that implements Neighbour:
+</p>
+
+<pre><code class="code code--block language-go">type InternalNeighbour struct {
+	diffusionCoeff float32
+	cellIndex      int
+}
+
+func (n *InternalNeighbour) CouplingCoefficient() float32 {
+	return n.diffusionCoeff
+}
+
+func (n *InternalNeighbour) ApplyOffDiagonalContribution(matrix *tensor.Matrix, cellIndex, nCells int) {
+	matrix.Set(cellIndex, n.cellIndex, -1.0*n.CouplingCoefficient())
+}
+
+func (n *InternalNeighbour) RHSContribution() float32 { return 0.0 }
+</code></pre>
+
+<p>
+	But also a dirichlet neighour type that has the same methods:
+</p>
+
+<pre><code class="code code--block language-go">type DirichletNeighbour struct {
+	diffusionCoeff float32
+	boundaryValue  float32
+}
+
+func (dn *DirichletNeighbour) CouplingCoefficient() float32 { return dn.diffusionCoeff }
+
+func (dn *DirichletNeighbour) ApplyOffDiagonalContribution(matrix *tensor.Matrix, cellIndex, nCells int) {}
+
+func (dn *DirichletNeighbour) RHSContribution() float32 {
+	return dn.diffusionCoeff * dn.boundaryValue
+}
+</code></pre>
+
+<p>
+	This means that our Cell can have a strongly-typed field "neighbours" that
+	is an array (well, technically a slice if you know Go) of type Neighbour
+	and so all Cell "knows" about it's neighbours is that you can get
+	contributions from them - all the logic is relegated to factory functions that
+	figure out what type of neighbours each cell should have before the rendering
+	loop starts.  This is the core of polymorphism - an object is defined
+	in terms of its functionality rather than its internal data or implementation
+	details, allowing for very loose coupling of data structures.
+</p>
+
+<h2>Creating some general principles</h2>
+
+<p>
+	Based on the success of the refactor for boundary conditoins,I've decided to
+	adopt the following principles when writing future code for this project.
+</p>
+
+<ol>
+	<li>No condiitonals in my hot loop (the render loop)</li>
+	<li>Conditionals can only live in well defined factory functions</li>
+	<li>Components (renderer, mesh etc) must be as agnostic to other components as possible</li>
+</ol>
+
+<p>
+	So far these have been working great.  Thinking deeply about the ways that demarcated
+	blocks of code interact with each other has great benefit for adding more
+	complex functionality cleanly and general quality of life for me as
+	the developer.  Also, being intentional about using factory functions makes
+	it easy to reason about what belongs in the setup phase and the hot-loop,
+	which gives free performance benefits like precomputing things that
+	won't change to reduce the amount of float multiplication on every cycle.
+</p>
+
+<h2>The end result</h2>
+
+<figure class="wasm-canvas__container" id="cool-part">
+	<canvas id="cfd-canvas" width="800" height="400" class="wasm-canvas"></canvas>
+
+	<figcaption>
+		A 2D heat transfer simulation written using my branchless hot loop refactor.
+		Please note the config below is read-only, and so won't affect anything.
+	</figcaption>
+
+	<fieldset id="cfd-params" class="wasm-canvas__param-fieldset">
+		<legend>Simulation Paramaters</legend>
+
+		<div>
+			<label for="field">Field</label>
+			<input id="field" name="field" type="text" value="aluminiumTemp" readonly />
+		</div>
+
+		<div>
+			<label for="field-init">Starting Value</label>
+			<input id="field-init" name="field-init" type="number" value="20" readonly />
+		</div>
+
+		<fieldset id="boundary">
+			<legend>Boundary Dimensions</legend>
+
+			<div>
+				<label for="width">Width (m)</label>
+				<input id="width" name="width" type="number" value="0.1" readonly />
+			</div>
+
+			<div>
+				<label for="height">Height (m)</label>
+				<input id="height" name="height" type="number" value="0.05" readonly />
+			</div>
+		</fieldset>
+
+		<fieldset id="bbc">
+			<legend>Border Boundary Conditions</legend>
+
+			<fieldset id="north">
+				<legend>North Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0">Dirichlet</option>
+						<option value="1" selected>Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="east">
+				<legend>East Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0" selected>Dirichlet</option>
+						<option value="1">Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="south">
+				<legend>South Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0">Dirichlet</option>
+						<option value="1" selected>Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="0" readonly />
+				</div>
+			</fieldset>
+
+			<fieldset id="west">
+				<legend>West Border</legend>
+				<div>
+					<label for="type">Type</label>
+					<select id="type" name="type" readonly>
+						<option value="0" selected>Dirichlet</option>
+						<option value="1">Neumann</option>
+						<option value="2">Outflow</option>
+					</select>
+				</div>
+
+				<div>
+					<label for="value">Value</label>
+					<input id="value" name="value" type="number" value="200" readonly />
+				</div>
+			</fieldset>
+		</fieldset>
+
+		<fieldset id="src">
+			<legend>Volumetric Point Source Config</legend>
+			<div>
+				<label for="magnitude">Strength (W/m³)</label>
+				<input id="magnitude" name="magnitude" type="number" value="5e9" readonly />
+			</div>
+
+			<div>
+				<label for="x-pos">X Position</label>
+				<input id="x-pos" name="x-pos" type="number" value="0.05" readonly />
+			</div>
+
+			<div>
+				<label for="y-pos">Y Position</label>
+				<input id="y-pos" name="y-pos" type="number" value="0.025" readonly />
+			</div>
+		</fieldset>
+	</fieldset>
+</figure>
+
+{% include wasm-loader.html project="cfd-sim-v0.2" %}
+
+<h2>Next steps</h2>
+
+<p>
+	Before I use this new paradigm to add new features like convection terms or
+	unstructured meshes, I really need to replace my Gauss-Seidel solver. This is
+	because the tiny 21x11 grid above is running (in development) at &lt 10 FPS
+	which is just abysmal.  Having added a profiler (which you can check yourself
+	in the website console, just press F12) I can see that my optimised equation
+	assembly code is only taking an average of 50 nanoseconds per render.
+	However, the system solving code is taking an average of ~150ms per render
+	and so definitely needs to be optimised.  I think my next job will be to
+	learn about and implement a conjugate gradient method or something a lot more
+	efficient.
+</p>
